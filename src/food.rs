@@ -18,9 +18,9 @@ impl Plugin for FoodPlugin {
     }
 }
 
-fn spawn_food(mut commands: Commands) {
+pub fn spawn_food(mut commands: Commands) {
     commands
-        .spawn_bundle(SpriteBundle {
+        .spawn(SpriteBundle {
             sprite: Sprite {
                 color: FOOD_COLOR,
                 ..default()

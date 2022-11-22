@@ -28,7 +28,10 @@ pub struct SnakeSegment;
 #[derive(Component, Debug)]
 pub struct GrowthEvent;
 
-#[derive(Default)]
+#[derive(Component, Debug)]
+pub struct GameOverEvent;
+
+#[derive(Default, Resource)]
 pub struct LastTailPosition(pub Option<Position>);
 
 #[derive(PartialEq, Copy, Clone, Debug)]

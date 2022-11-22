@@ -1,9 +1,10 @@
 #[allow(unused)]
 use bevy::prelude::*;
+use bevy_kira_audio::prelude::*;
 //use bevy::time::FixedTimestep;
 //use rand::prelude::random;
 
-use crate::components::{GrowthEvent, Position, Size};
+use crate::components::{GameOverEvent, Position, Size};
 use crate::food::FoodPlugin;
 use crate::snake::SnakePlugin;
 mod components;
@@ -22,8 +23,14 @@ const TIMESTEP_3_PER_SECOND: f64 = 60.0 / 180.0;
 //const TIMESTEP_1_PER_SECOND: f64 = 60.0 / 60.0;
 //Constants end ------
 
+fn start_background_audio(asset_server: Res<AssetServer>, audio: Res<Audio>) {
+    audio
+        .play(asset_server.load("sounds/hell.ogg".to_string()))
+        .looped();
+}
+
 fn camera_setup_system(mut command: Commands) {
-    command.spawn_bundle(Camera2dBundle::default());
+    command.spawn(Camera2dBundle::default());
 }
 
 fn size_scaling(windows: Res<Windows>, mut q: Query<(&Size, &mut Transform)>) {
@@ -55,13 +62,7 @@ fn position_translation(windows: Res<Windows>, mut q: Query<(&Position, &mut Tra
 fn main() {
     App::new()
         .insert_resource(ClearColor(Color::rgb(0.04, 0.04, 0.04)))
-        .insert_resource(WindowDescriptor {
-            // <--
-            title: "Snake!".to_string(),
-            width: 500.0,
-            height: 500.0,
-            ..default()
-        })
+        .add_event::<GameOverEvent>()
         .add_startup_system(camera_setup_system)
         .add_system_set_to_stage(
             CoreStage::PostUpdate,
@@ -70,8 +71,25 @@ fn main() {
                 .with_system(size_scaling),
         )
         .add_plugin(SnakePlugin)
-        .add_plugins(DefaultPlugins)
+        .add_plugins(
+            DefaultPlugins
+                .set(AssetPlugin {
+                    watch_for_changes: true,
+                    ..default()
+                })
+                .set(WindowPlugin {
+                    window: WindowDescriptor {
+                        title: "Snake Game".to_string(),
+                        width: 500.0,
+                        height: 500.0,
+                        ..default()
+                    },
+                    ..default()
+                }),
+        )
         .add_plugin(FoodPlugin)
+        .add_plugin(AudioPlugin)
+        .add_startup_system(start_background_audio)
         .run();
 }
 
