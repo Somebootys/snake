@@ -3,7 +3,9 @@ use bevy::prelude::*;
 //use bevy::time::FixedTimestep;
 use rand::prelude::random;
 
-use crate::components::{Food, GrowthEvent, LastTailPosition, Position, Size, SnakeHead};
+use crate::components::{
+    Food, GrowthEvent, LastTailPosition, Position, Score, ScoreText, Size, SnakeHead,
+};
 use crate::snake::{spawn_snake_segment, SnakeSegments};
 use crate::{ARENA_HEIGHT, ARENA_WIDTH, FOOD_COLOR};
 
@@ -40,14 +42,27 @@ fn spawn_new_food(
     head_query: Query<&Position, With<SnakeHead>>,
     mut commands: Commands,
     mut growth_writer: EventWriter<GrowthEvent>,
+    mut score: ResMut<Score>,
+    mut query: Query<&mut Text, With<ScoreText>>,
 ) {
     if let Some((food_entity, food_pos)) = query_food.iter().next() {
         if let Some(head_pos) = head_query.iter().next() {
             if collision_check(head_pos.x, head_pos.y, food_pos.x, food_pos.y) {
-                println!("Yum!");
+                // despwan food
                 commands.entity(food_entity).despawn();
+                // grow snake
                 growth_writer.send(GrowthEvent);
+                //spawn new food
                 spawn_food(commands);
+
+                // reset the score
+                let Score(prev_score) = *score;
+                println!("Prev score: {:?}", prev_score);
+                *score = Score(prev_score + 1);
+                for mut text in &mut query {
+                    // Update the value of the second section :x prints debug info.
+                    text.sections[1].value = format!("{}", prev_score + 1);
+                }
             }
         }
     }

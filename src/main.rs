@@ -4,7 +4,7 @@ use bevy_kira_audio::prelude::*;
 //use bevy::time::FixedTimestep;
 //use rand::prelude::random;
 
-use crate::components::{GameOverEvent, Position, Size};
+use crate::components::{GameOverEvent, Position, Score, ScoreText, Size};
 use crate::food::FoodPlugin;
 use crate::snake::SnakePlugin;
 mod components;
@@ -29,8 +29,38 @@ fn start_background_audio(asset_server: Res<AssetServer>, audio: Res<Audio>) {
         .looped();
 }
 
-fn camera_setup_system(mut command: Commands) {
+fn camera_setup_system(mut command: Commands, asset_server: Res<AssetServer>) {
     command.spawn(Camera2dBundle::default());
+
+    command.spawn((
+        // Create a TextBundle that has a Text with a list of sections.
+        TextBundle::from_sections([
+            TextSection::new(
+                "Score: ",
+                TextStyle {
+                    font: asset_server.load("fonts/FiraSans-Bold.ttf"),
+                    font_size: 60.0,
+                    color: Color::WHITE,
+                },
+            ),
+            TextSection::new(
+                "0",
+                TextStyle {
+                    font: asset_server.load("fonts/FiraMono-Medium.ttf"),
+                    font_size: 60.0,
+                    color: Color::GOLD,
+                },
+            ),
+        ])
+        .with_text_alignment(TextAlignment::TOP_CENTER)
+        // Set the style of the TextBundle itself.
+        .with_style(Style {
+            align_self: AlignSelf::FlexEnd,
+            position_type: PositionType::Absolute,
+            ..default()
+        }),
+        ScoreText,
+    ));
 }
 
 fn size_scaling(windows: Res<Windows>, mut q: Query<(&Size, &mut Transform)>) {
@@ -90,6 +120,7 @@ fn main() {
         .add_plugin(FoodPlugin)
         .add_plugin(AudioPlugin)
         .add_startup_system(start_background_audio)
+        .insert_resource(Score(0))
         .run();
 }
 

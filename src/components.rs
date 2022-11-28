@@ -2,6 +2,13 @@
 use bevy::prelude::*;
 
 //Components--------------
+
+#[derive(Component, Resource)]
+pub struct Score(pub i32);
+
+#[derive(Component)]
+pub struct ScoreText;
+
 #[derive(Component)]
 pub struct SnakeHead {
     pub direction: Direction,

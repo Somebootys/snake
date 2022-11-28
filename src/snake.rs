@@ -3,7 +3,8 @@ use bevy::prelude::*;
 use bevy::time::FixedTimestep;
 
 use crate::components::{
-    Direction, Food, GameOverEvent, LastTailPosition, Position, Size, SnakeHead, SnakeSegment,
+    Direction, Food, GameOverEvent, LastTailPosition, Position, Score, ScoreText, Size, SnakeHead,
+    SnakeSegment,
 };
 use crate::food::spawn_food;
 use crate::{SNAKE_COLOR, SNAKE_SEGMENT_COLOR, TIMESTEP_3_PER_SECOND};
@@ -90,6 +91,8 @@ fn snake_movement(
     mut heads: Query<(Entity, &SnakeHead)>,
     mut positions: Query<&mut Position>,
     mut game_over_writer: EventWriter<GameOverEvent>,
+    mut score: ResMut<Score>,
+    mut query: Query<&mut Text, With<ScoreText>>,
 ) {
     if let Some((head_entity, head)) = heads.iter_mut().next() {
         let segment_positions = segments
@@ -124,6 +127,14 @@ fn snake_movement(
 
             if snakesegments.any(|&pos| pos == snakehead) {
                 game_over_writer.send(GameOverEvent);
+
+                // resetting the score
+                *score = Score(0);
+                for mut text in &mut query {
+                    // Update the value of the second section :x prints debug info.
+                    text.sections[1].value = format!("{}", 0);
+                }
+
                 println!("Game over");
             }
         }
@@ -141,20 +152,25 @@ fn snake_movement(
 }
 
 fn wall_collision(mut head_pos_x: i32, mut head_pos_y: i32) -> (i32, i32) {
-    let right_top_boarder: i32 = 10;
-    let left_bot_boarder: i32 = -1;
+    let right_boarder: i32 = 10;
+    let top_boarder: i32 = 10;
+    let left_boarder: i32 = -1;
+    let bot_boarder: i32 = -1;
+    let one = 1;
 
-    if head_pos_x == right_top_boarder {
-        head_pos_x = left_bot_boarder;
+    // check outside border, place within boarder hence the +1 and - 1.
+
+    if head_pos_x == right_boarder {
+        head_pos_x = left_boarder + one;
         println!("You hit the right wall")
-    } else if head_pos_x == left_bot_boarder {
-        head_pos_x = right_top_boarder;
+    } else if head_pos_x == left_boarder {
+        head_pos_x = right_boarder - one;
         println!("You hit the left wall");
-    } else if head_pos_y == left_bot_boarder {
-        head_pos_y = right_top_boarder;
+    } else if head_pos_y == bot_boarder {
+        head_pos_y = top_boarder - one;
         println!("You hit the bottom wall");
-    } else if head_pos_y == right_top_boarder {
-        head_pos_y = left_bot_boarder;
+    } else if head_pos_y == top_boarder {
+        head_pos_y = bot_boarder + one;
         println!("You hit the top wall");
     }
     (head_pos_x, head_pos_y)
@@ -162,7 +178,7 @@ fn wall_collision(mut head_pos_x: i32, mut head_pos_y: i32) -> (i32, i32) {
 
 fn game_over(
     mut commands: Commands,
-        commands_food: Commands,
+    commands_food: Commands,
     mut reader: EventReader<GameOverEvent>,
     segments_res: ResMut<SnakeSegments>,
     food: Query<Entity, With<Food>>,
