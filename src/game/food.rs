@@ -6,8 +6,8 @@ use rand::prelude::random;
 use crate::components::{
     Food, GrowthEvent, LastTailPosition, Position, Score, ScoreText, Size, SnakeHead,
 };
-use crate::snake::{spawn_snake_segment, SnakeSegments};
-use crate::{ARENA_HEIGHT, ARENA_WIDTH, FOOD_COLOR};
+use crate::modul::snake::{spawn_snake_segment, SnakeSegments};
+use crate::constants::{ARENA_HEIGHT, ARENA_WIDTH, FOOD_COLOR};
 
 pub struct FoodPlugin;
 

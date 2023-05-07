@@ -6,8 +6,11 @@ use crate::components::{
     Direction, Food, GameOverEvent, LastTailPosition, Position, Score, ScoreText, Size, SnakeHead,
     SnakeSegment,
 };
-use crate::food::spawn_food;
-use crate::{SNAKE_COLOR, SNAKE_SEGMENT_COLOR, TIMESTEP_3_PER_SECOND};
+use crate::modul::food::spawn_food;
+use crate::constants::{SNAKE_COLOR, SNAKE_SEGMENT_COLOR, TIMESTEP_3_PER_SECOND};
+
+
+
 #[derive(Default, Deref, DerefMut, Resource)]
 pub struct SnakeSegments(Vec<Entity>);
 
